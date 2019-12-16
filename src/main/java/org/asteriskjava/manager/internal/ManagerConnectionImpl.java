@@ -81,7 +81,7 @@ public class ManagerConnectionImpl implements ManagerConnection, Dispatcher
 
     private static final AtomicLong idCounter = new AtomicLong(0);
 
-    private final ExecutorService reconnectPoll;
+    private final ExecutorService reconnectPool;
 
     /**
      * Instance logger.
@@ -224,14 +224,14 @@ public class ManagerConnectionImpl implements ManagerConnection, Dispatcher
     /**
      * Creates a new instance.
      */
-    public ManagerConnectionImpl(ExecutorService reconnectPoll)
+    public ManagerConnectionImpl(ExecutorService reconnectPool)
     {
         this.id = idCounter.getAndIncrement();
         this.responseListeners = new HashMap<>();
         this.responseEventListeners = new HashMap<>();
         this.eventListeners = new ArrayList<>();
         this.protocolIdentifier = new ProtocolIdentifierWrapper();
-        this.reconnectPoll = reconnectPoll;
+        this.reconnectPool = reconnectPool;
     }
 
 	public ManagerConnectionImpl()
@@ -241,7 +241,7 @@ public class ManagerConnectionImpl implements ManagerConnection, Dispatcher
 		this.responseEventListeners = new HashMap<>();
 		this.eventListeners = new ArrayList<>();
 		this.protocolIdentifier = new ProtocolIdentifierWrapper();
-		this.reconnectPoll = Executors.newSingleThreadExecutor();
+		this.reconnectPool = Executors.newSingleThreadExecutor();
 
 	}
 
@@ -1313,7 +1313,7 @@ public class ManagerConnectionImpl implements ManagerConnection, Dispatcher
 			        // After sending the DisconnectThread that thread will die
 			        // anyway.
 			        cleanup();
-			        reconnectPoll.execute(new Runnable() {
+			        reconnectPool.execute(new Runnable() {
 						public void run() {
 							reconnect();
 						}
